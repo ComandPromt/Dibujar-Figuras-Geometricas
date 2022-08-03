@@ -4,116 +4,177 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
-import java.io.File;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.io.IOException;
 
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
-import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
-import javax.swing.JMenu;
+import javax.swing.JLabel;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.KeyStroke;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
+import combo_suggestion.ComboBoxSuggestion;
 import modele.Carre;
 import modele.Cercle;
 import modele.DessinModele;
 import modele.FigureColoree;
 import modele.Heart;
+import modele.Poligono;
 import modele.Quadrilatere;
 import modele.Rectangle;
 import modele.Star;
 import modele.Triangle;
+import modele.Triangulo;
 import net.java.dev.colorchooser.demo.CopyColor;
+import radio_button.RadioButtonCustom;
 import vue.VueDessin;
 
-/**
- * Classe representant un Panneau Choix
- */
 public class PanneauChoix extends JPanel {
 
 	public static CopyColor couleur;
-	/**
-	 * La vue dessin principale
-	 */
-	private VueDessin vdessin;
 
-	/**
-	 * Le dessin Modele
-	 */
-	private DessinModele dmodele;
+	private static VueDessin vdessin;
 
-	/**
-	 * Le figure en cours
-	 */
-	private FigureColoree figureEnCours;
+	public static DessinModele dmodele;
 
-	/**
-	 * Tableau des string des formes
-	 */
+	private static FigureColoree figureEnCours;
+
 	private String[] tabForme;
 
-	/**
-	 * Combo box des formes
-	 */
-	private JComboBox<String> formes;
+	public static ComboBoxSuggestion<String> formes;
 
-	/**
-	 * Couleur en cours
-	 */
 	private Color colorSelected;
 
-	/**
-	 * Bouttons d'effacement
-	 */
-	private JMenuItem effacerTout, effacerSelection;
+	private static JMenuItem effacerTout;
 
-	/**
-	 * Bouton de controle de sauvegarde
-	 */
-	private JMenuItem sauvegarder, charger;
+	private static JMenuItem effacerSelection;
 
-	/**
-	 * Manipulateur de Formes
-	 */
-	private ManipulateurFormes manipulateurFormes;
+	private static ManipulateurFormes manipulateurFormes;
 
 	private JMenuItem undo, redo;
 
 	private JMenuBar menu;
 
-	private ButtonImage gomme;
+	private static RadioButtonCustom gomme;
+
+	private ComboBoxSuggestion<String> formas;
+
+	private JLabel form;
+
+	public static RadioButtonCustom thin;
+
+	public static RadioButtonCustom strong;
+
+	private JLabel lblNewLabel;
+
+	public static RadioButtonCustom newFig;
+
+	public static RadioButtonCustom mainLevee;
+
+	public static RadioButtonCustom manip;
+
+	private void limpiar() {
+
+		formas.removeAllItems();
+
+	}
 
 	@SuppressWarnings("deprecation")
+
+	public static void modificar() {
+		manip.setSelected(true);
+		newFig.setSelected(false);
+		mainLevee.setSelected(false);
+		gomme.setSelected(false);
+		formes.setEnabled(false);
+		couleur.setEnabled(true);
+		effacerSelection.setEnabled(true);
+		effacerTout.setEnabled(true);
+		supFigure();
+		manipulateurFormes = new ManipulateurFormes(dmodele);
+		vdessin.ajoutManip(manipulateurFormes);
+	}
+
 	public PanneauChoix(final VueDessin vdessin) throws IOException {
+
+		newFig = new RadioButtonCustom("Nouvelle figure");
+
+		mainLevee = new RadioButtonCustom("Tracé à main levée");
+
+		manip = new RadioButtonCustom("Manipulations");
+
 		this.vdessin = vdessin;
+
 		this.colorSelected = Color.BLACK;
+
 		dmodele = new DessinModele();
+
 		dmodele.addObserver(vdessin);
-		tabForme = new String[] { "Rectangle", "Triangle", "Quadrilatere", "Cercle", "Carre", "Heart", "Start",
-				"Star 360", "Star 4p" };
+
+		tabForme = new String[] { "Rectangle", "Triangle", "Quadrilatere", "Cercle", "Carre", "Heart", "Star",
+				"Poligone" };
+
 		JPanel j = new JPanel();
+		j.setBackground(Color.WHITE);
 
 		JPanel j2 = new JPanel();
+		j2.setBackground(Color.WHITE);
 
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
-		final ButtonImage newFig = new ButtonImage("Nouvelle figure", "ressources/images/figures.png",
-				"ressources/images/figuresSelected.png");
-		final ButtonImage mainLevee = new ButtonImage("Tracé à main levée", "ressources/images/pencil.png",
-				"ressources/images/pencilSelected.png");
-		final ButtonImage manip = new ButtonImage("Manipulations", "ressources/images/transform.png",
-				"ressources/images/transformSelected.png");
+		gomme = new RadioButtonCustom("Gomme");
 
-		gomme = new ButtonImage("Gomme", "ressources/images/rubber.png", "ressources/images/rubberSelected.png");
+		formes = new ComboBoxSuggestion<>();
 
-		formes = new JComboBox<>(tabForme);
+		formes.addItemListener(new ItemListener() {
+
+			public void itemStateChanged(ItemEvent e) {
+
+				switch (formes.getSelectedItem().toString()) {
+
+				case "Star":
+
+					limpiar();
+
+					formas.addItem("Star 4p");
+
+					formas.addItem("Clasic 5p");
+
+					formas.addItem("David's Star");
+
+					formas.addItem("Star 360 º");
+
+					formas.addItem("Custom Start");
+
+					break;
+
+				case "Triangle":
+
+					limpiar();
+
+					formas.addItem("Rectangle");
+
+					formas.addItem("Equilatero");
+
+					formas.addItem("Isosceles");
+
+					formas.addItem("Free");
+
+					break;
+
+				}
+
+			}
+
+		});
+
+		for (int i = 0; i < tabForme.length; i++) {
+
+			formes.addItem(tabForme[i]);
+
+		}
 
 		couleur = new CopyColor(colorSelected, false);
 
@@ -122,56 +183,42 @@ public class PanneauChoix extends JPanel {
 		couleur.setPreferredSize(new Dimension(25, 25));
 
 		ButtonGroup b = new ButtonGroup();
+
 		b.add(newFig);
+
 		b.add(mainLevee);
+
 		b.add(manip);
+
 		b.add(gomme);
 
 		effacerSelection = new JMenuItem("Effacer");
+
 		effacerSelection.setEnabled(false);
 
 		effacerSelection.addActionListener(new ActionListener() {
+
 			@Override
+
 			public void actionPerformed(ActionEvent e) {
+
 				if (manipulateurFormes != null) {
+
 					Stockage.addNewSauvegarde(dmodele.getListFigureColore());
+
 					dmodele.delFigureColoree(manipulateurFormes.figureSelection());
+
 					dmodele.update();
+
 				}
+
 			}
+
 		});
 
 		effacerTout = new JMenuItem("Effacer Tout");
+
 		effacerTout.setEnabled(false);
-
-		sauvegarder = new JMenuItem("Enregister sous ...");
-		sauvegarder.setEnabled(true);
-		charger = new JMenuItem("Ouvrir ...");
-		charger.setEnabled(true);
-
-		charger.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				try {
-					JFileChooser fc = new JFileChooser();
-					fc.setFileFilter(new FileNameExtensionFilter("IHM extension", "ihm"));
-					int a = fc.showDialog(vdessin, "Set File directory");
-					if (a == 0) {
-						String s = fc.getSelectedFile().getAbsolutePath();
-						dmodele.chargerFigures(s.endsWith(".ihm") ? s : s + ".ihm");
-					}
-				} catch (IOException | ClassNotFoundException e1) {
-					JOptionPane.showMessageDialog(vdessin, "Aucun fichier de sauvegarde disponible");
-				}
-			}
-		});
-
-		sauvegarder.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				save();
-			}
-		});
 
 		effacerTout.addActionListener(new ActionListener() {
 			@Override
@@ -185,26 +232,25 @@ public class PanneauChoix extends JPanel {
 		newFig.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				newFig.setActivated();
-				mainLevee.setDeactivated();
-				manip.setDeactivated();
-				gomme.setDeactivated();
+				newFig.setSelected(true);
+				mainLevee.setSelected(false);
+				manip.setSelected(false);
+				gomme.setSelected(false);
 				formes.setEnabled(true);
 				couleur.setEnabled(true);
 				supFigure();
 				formes.setSelectedIndex(formes.getSelectedIndex());
-				effacerSelection.setEnabled(false);
-				effacerTout.setEnabled(false);
+
 			}
 		});
 
 		mainLevee.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				mainLevee.setActivated();
-				newFig.setDeactivated();
-				manip.setDeactivated();
-				gomme.setDeactivated();
+				mainLevee.setSelected(true);
+				newFig.setSelected(false);
+				manip.setSelected(false);
+				gomme.setSelected(false);
 				formes.setEnabled(false);
 				couleur.setEnabled(true);
 				supFigure();
@@ -218,26 +264,17 @@ public class PanneauChoix extends JPanel {
 		manip.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				manip.setActivated();
-				newFig.setDeactivated();
-				mainLevee.setDeactivated();
-				gomme.setDeactivated();
-				formes.setEnabled(false);
-				couleur.setEnabled(true);
-				effacerSelection.setEnabled(true);
-				effacerTout.setEnabled(true);
-				supFigure();
-				manipulateurFormes = new ManipulateurFormes(dmodele);
-				vdessin.ajoutManip(manipulateurFormes);
+				modificar();
 			}
+
 		});
 
 		gomme.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				manip.setDeactivated();
-				newFig.setDeactivated();
-				mainLevee.setDeactivated();
+				manip.setSelected(false);
+				newFig.setSelected(false);
+				mainLevee.setSelected(false);
 				formes.setEnabled(false);
 				couleur.setEnabled(false);
 				effacerSelection.setEnabled(false);
@@ -245,7 +282,8 @@ public class PanneauChoix extends JPanel {
 				supFigure();
 				Gommeur gommeur = new Gommeur(dmodele);
 				vdessin.ajoutGommmeur(gommeur);
-				gomme.setActivated();
+				gomme.setSelected(true);
+
 			}
 		});
 
@@ -253,6 +291,9 @@ public class PanneauChoix extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				try {
+
+					// contador++;
+
 					vdessin.enleverListeners();
 					figureEnCours = creeFigure(formes.getSelectedIndex());
 					figureEnCours.changeCouleur(colorSelected);
@@ -269,11 +310,29 @@ public class PanneauChoix extends JPanel {
 		j2.add(effacerTout);
 		j2.add(effacerSelection);
 		j2.add(couleur);
+
+		lblNewLabel = new JLabel("");
+		// lblNewLabel.setIcon(new
+		// ImageIcon(PanneauChoix.class.getResource("/images/star-1.png")));
+		j2.add(lblNewLabel);
+
+		form = new JLabel("");
+		j2.add(form);
 		j2.add(formes);
+
+		formas = new ComboBoxSuggestion();
+
+		j2.add(formas);
+
+		thin = new RadioButtonCustom("Thin");
+		j2.add(thin);
+
+		strong = new RadioButtonCustom("Strong");
+		j2.add(strong);
 		j2.add(gomme);
-		j2.add(sauvegarder);
-		j2.add(charger);
+
 		this.add(j2);
+
 	}
 
 	public JMenuBar getMenuBar() {
@@ -307,129 +366,11 @@ public class PanneauChoix extends JPanel {
 	}
 
 	/**
-	 * Permet de save la figure
-	 */
-	public void save() {
-		try {
-			JFileChooser fc = new JFileChooser();
-			fc.setFileFilter(new FileNameExtensionFilter("IHM extension", "ihm"));
-			int a = fc.showDialog(vdessin, "Get File directory");
-			if (a == 0) {
-				String s = fc.getSelectedFile().getAbsolutePath();
-				dmodele.sauvegarderFigures(s.endsWith(".ihm") ? s : s + ".ihm", dmodele.getListFigureColore());
-			}
-		} catch (IOException e1) {
-			JOptionPane.showMessageDialog(vdessin, "Erreur lors de la sauvegarde");
-		}
-	}
-
-	/**
 	 * Initialise le menu
 	 */
 	private void initMenu() {
 		menu = new JMenuBar();
 		menu.setVisible(true);
-		JMenu file = new JMenu("Fichier");
-		file.add(sauvegarder);
-		sauvegarder.setToolTipText("Pour sauvegarder");
-		sauvegarder.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK));
-		file.add(charger);
-		charger.setToolTipText("Pour Ouvrir une sauvegarde");
-		charger.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK));
-		menu.add(file);
-
-		JMenu edit = new JMenu("Edit");
-		edit.add(effacerSelection);
-		effacerSelection.setToolTipText("Pour supprimer la figure selectionner");
-		effacerSelection.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0));
-		edit.add(effacerTout);
-		menu.add(edit);
-		effacerTout.setToolTipText("Pour tout supprimer");
-		effacerTout.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, InputEvent.CTRL_DOWN_MASK));
-		menu.add(edit);
-
-		JMenu aide = new JMenu("Aide");
-		JMenuItem aideBut = new JMenuItem("Aide");
-		aideBut.setToolTipText("Pour avoir de l'aide");
-		aideBut.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_H, InputEvent.CTRL_DOWN_MASK));
-		aideBut.addActionListener(e -> vdessin.openPDF());
-		aide.add(aideBut);
-		menu.add(aide);
-
-		JMenuItem image = new JMenuItem("Exporter en image");
-		image.setToolTipText("Pour avoir l' image de ce qui est dessiné");
-		image.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, InputEvent.CTRL_DOWN_MASK));
-		image.addActionListener(e -> {
-			JFileChooser jFileChooser = new JFileChooser("Exporter en image");
-			jFileChooser.setFileFilter(new FileNameExtensionFilter("Image (.png,.jpg,.jpeg)", "png", "jpg", "jpeg"));
-			int i = jFileChooser.showDialog(vdessin, "Exporter");
-			if (i == 0) {
-				File f = jFileChooser.getSelectedFile();
-				i = JOptionPane.showConfirmDialog(vdessin,
-						"Cette opération peut prendre un certain temps, voulez vous contiuer ?");
-
-				if (i == 0) {
-					vdessin.toImage(f);
-				}
-
-			}
-		});
-		file.add(image);
-
-		JMenuItem changTaile = new JMenuItem("Changer la taille ...");
-		changTaile.setToolTipText("Pour changer l'immage ");
-		changTaile.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.ALT_DOWN_MASK));
-		changTaile.addActionListener(e -> {
-			String r = JOptionPane.showInputDialog("Taille du dessins : (width,height)",
-					vdessin.getPreferredSize().width + "," + vdessin.getPreferredSize().height);
-
-			int w, h;
-			try {
-				String[] spl = r.split(",");
-				w = Integer.valueOf(spl[0]);
-				h = Integer.valueOf(spl[1]);
-			} catch (Exception ex) {
-				JOptionPane.showMessageDialog(vdessin, "Valeurs invalide");
-				return;
-			}
-			Dimension s = new Dimension(w, h);
-			Dimension min = vdessin.getMinimumSize();
-			if (s.height < min.height || s.width < min.height) {
-				JOptionPane.showMessageDialog(vdessin, "Taille trop petite, min " + min.width + "," + min.height);
-				return;
-			}
-			vdessin.setPreferredSize(s);
-			JOptionPane.showMessageDialog(vdessin, "Taille changée");
-			vdessin.getParent().revalidate();
-
-		});
-		file.addSeparator();
-		file.add(changTaile);
-
-		edit.addSeparator();
-		undo = new JMenuItem("Annuler");
-		undo.setToolTipText("Annule la dernière opération");
-		undo.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_DOWN_MASK));
-		undo.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				dmodele.setListFigureColore(Stockage.retrieveLast(dmodele.getListFigureColore()));
-				look();
-			}
-		});
-		edit.add(undo);
-
-		redo = new JMenuItem("Revenir");
-		redo.setToolTipText("Revenir a la dernière opération");
-		redo.setAccelerator(KeyStroke.getKeyStroke("control alt Z"));
-		redo.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				dmodele.setListFigureColore(Stockage.retriveBefore(dmodele.getListFigureColore()));
-				look();
-			}
-		});
-		edit.add(redo);
 		look();
 		vdessin.repaint();
 	}
@@ -437,7 +378,7 @@ public class PanneauChoix extends JPanel {
 	/**
 	 * Permet de suprimer la figure plus simplement
 	 */
-	private void supFigure() {
+	private static void supFigure() {
 		if (figureEnCours != null) {
 			figureEnCours = null;
 		}
@@ -468,8 +409,13 @@ public class PanneauChoix extends JPanel {
 
 		case 1:
 
-			return new Triangle();
+			if (formas.getSelectedIndex() == 3) {
 
+				return new Triangle();
+
+			} else {
+				return new Triangulo(formas.getSelectedIndex());
+			}
 		case 2:
 
 			return new Quadrilatere();
@@ -490,15 +436,11 @@ public class PanneauChoix extends JPanel {
 
 		case 6:
 
-			return new Star(1);
+			return new Star(formas.getSelectedIndex());
 
 		case 7:
 
-			return new Star(2);
-
-		case 8:
-
-			return new Star(3);
+			return new Poligono(1);
 
 		}
 

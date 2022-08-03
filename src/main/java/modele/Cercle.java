@@ -1,129 +1,131 @@
 package modele;
 
 import java.awt.Graphics;
+import java.awt.Shape;
 import java.awt.event.MouseEvent;
+import java.awt.geom.Path2D;
 import java.util.List;
 
-import controleur.FabricantCercle;
 import controleur.FabricantFigure;
 import controleur.PanneauChoix;
 import main.Fenetre;
 
-/**
- * Classe representant un Cercle
- */
 public class Cercle extends FigureColoree {
 
-	/**
-	 * Methode permettant de connaitre le nombre de points a cliquer necessaire a la
-	 * construction du cercle
-	 *
-	 * @return Le nombre de cliques necessaire
-	 */
+	private boolean mainLevee;
+
+	public static Graphics dibujo;
+
+	int tipo;
+
+	Point p2;
+
+	boolean star360 = false;
+
+	private static Shape createStar(double centerX, double centerY, double innerRadius, double outerRadius, int numRays,
+			double startAngleRad) {
+		Path2D path = new Path2D.Double();
+		try {
+			double deltaAngleRad = Math.PI / numRays;
+			for (int i = 0; i < numRays * 2; i++) {
+				double angleRad = startAngleRad + i * deltaAngleRad;
+				double ca = Math.cos(angleRad);
+				double sa = Math.sin(angleRad);
+				double relX = ca;
+				double relY = sa;
+				if ((i & 1) == 0) {
+					relX *= outerRadius;
+					relY *= outerRadius;
+				} else {
+					relX *= innerRadius;
+					relY *= innerRadius;
+				}
+				if (i == 0) {
+					path.moveTo(centerX + relX, centerY + relY);
+				} else {
+					path.lineTo(centerX + relX, centerY + relY);
+				}
+			}
+
+			path.closePath();
+
+		}
+
+		catch (Exception e) {
+
+		}
+
+		return path;
+	}
+
+	@Override
+
 	public int nbPoints() {
-		return 2;
+
+		return 1;
+
 	}
 
 	@Override
+
 	public int nbClics() {
+
 		return 2;
+
 	}
 
-	/**
-	 * Setter des points
-	 *
-	 * @param points les points a ajouter
-	 */
 	@Override
+
 	public void modifierPoints(List<Point> points) {
+
 		tab_mem = points;
+
 	}
 
-	/**
-	 * Permet d'afficher le Cercle
-	 *
-	 * @param g Graphics
-	 */
-	@Override
+	int conteo = 0;
 
 	public void affiche(Graphics g) {
 
-		if (!tab_mem.isEmpty()) {
+		p2 = tab_mem.get(1);
 
-			Point p1 = tab_mem.get(0);
+		g.setColor(PanneauChoix.couleur.getColor());
 
-			Point p2 = tab_mem.get(1);
+		g.drawOval(p2.getX() - 2, p2.getY(), Fenetre.cm.getValor() * 168, Fenetre.cm.getValor() * 168);
 
-			int distX = (int) p1.distance(p2);
-
-			g.setColor(PanneauChoix.couleur.getColor());
-			
-			g.drawOval(p2.getX() - 2 * distX, p2.getY() - distX, Fenetre.cm.getValor() * 168,
-					Fenetre.cm.getValor() * 168);
-
-			super.affiche(g);
-
-		}
+		super.affiche(g);
 
 	}
 
-	/**
-	 * {@inheritDoc}
-	 *
-	 * @param e l'event
-	 * @return true si elle est dedans, false sinon
-	 */
 	@Override
+
 	public boolean isInSelection(MouseEvent e) {
-		int last_x = e.getX();
-		int last_y = e.getY();
 
 		if (!tab_mem.isEmpty()) {
-			Point p1 = getPoints().get(0);
-			Point p2 = getPoints().get(1);
-			int distX = p2.getX() - p1.getX();
-			int distance = (int) p1.distance(p2);
-			int xCentre = (p2.getX() - 2 * distX) + distance;
-			int yCentre = (p2.getY() - distX) + distance;
 
-			if (Math.pow(last_x - xCentre, 2) + Math.pow(last_y - yCentre, 2) <= Math.pow(distance, 2)) {
-				selectionne();
-				return true;
-			}
-			return false;
+			selectionne();
+
+			return true;
+
 		}
+
 		return false;
+
 	}
 
-	/**
-	 * {@inheritDoc}
-	 *
-	 * @param selected le point slelectioner
-	 * @param difX     de combien le bouger de x
-	 * @param difY     de combien le bouger de y
-	 */
 	@Override
-	public void transforamtionFigure(Point selected, int difX, int difY) {
-		if (selected.equals(getPoints().get(0))) {
-			for (Point p : getPoints()) {
-				p.translater(difX, difY);
-			}
-		} else {
-			if (tab_mem.get(1).getX() + difX > tab_mem.get(0).getX() + 10) {
-				selected.translater(difX, 0);
-			}
-		}
-	}
 
-	/**
-	 * {@inheritDoc}
-	 *
-	 * @param dessinModele le dessin model
-	 * @return
-	 */
-	@Override
 	public FabricantFigure getConstructeur(DessinModele dessinModele) {
-		return new FabricantCercle(this, dessinModele);
+
+		return new FabricantFigure(this, dessinModele);
+
+	}
+
+	@Override
+
+	public boolean isMainLevee() {
+
+		return mainLevee;
+
 	}
 
 }

@@ -104,13 +104,19 @@ public abstract class FigureColoree implements Serializable {
 		if (selected) {
 
 			for (Point p : tab_mem) {
+
 				int[] x = { p.getX() + TAILLE_CARRE_SELECTION / 2, p.getX() - TAILLE_CARRE_SELECTION / 2,
 						p.getX() - TAILLE_CARRE_SELECTION / 2, p.getX() + TAILLE_CARRE_SELECTION / 2 };
+
 				int[] y = { p.getY() - TAILLE_CARRE_SELECTION / 2, p.getY() - TAILLE_CARRE_SELECTION / 2,
 						p.getY() + TAILLE_CARRE_SELECTION / 2, p.getY() + TAILLE_CARRE_SELECTION / 2 };
+
 				Polygon r = new Polygon(x, y, 4);
+
 				rList.put(r, p);
+
 				g.setColor(Color.WHITE);
+
 				g.drawPolygon(r);
 
 			}

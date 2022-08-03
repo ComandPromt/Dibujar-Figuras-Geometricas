@@ -2,7 +2,6 @@ package vue;
 
 import java.awt.Color;
 import java.awt.Cursor;
-import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Image;
@@ -21,6 +20,7 @@ import java.util.Observer;
 import javax.imageio.ImageIO;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
 
 import controleur.FabricantFigure;
 import controleur.Gommeur;
@@ -50,10 +50,15 @@ public class VueDessin extends JPanel implements Observer {
 	 * Constructeur ajoutant la taille
 	 */
 	public VueDessin() {
+
+		setBorder(new EmptyBorder(0, 0, 0, 0));
+
 		setVisible(true);
+
 		setPreferredSize(new Dimension(3000, 3000));
+
 		setBackground(Color.WHITE);
-		setBorder(null);
+
 	}
 
 	/**
@@ -140,24 +145,6 @@ public class VueDessin extends JPanel implements Observer {
 		addMouseListener(gommeur);
 		addMouseMotionListener(gommeur);
 		addCursor(IMAGES_RUBBER_SELECTED, new Point(15, 15));
-	}
-
-	/**
-	 * Permet d'ouvir un PDF
-	 */
-	public void openPDF() {
-		if (Desktop.isDesktopSupported()) {
-			try {
-				File myFile = new File("ressources/pdf/Compte_rendu_IHM.pdf");
-				Desktop.getDesktop().open(myFile);
-			} catch (IOException ex) {
-				JOptionPane.showMessageDialog(this, "Aucune application pour ouvrir le PDF");
-			} catch (IllegalArgumentException iae) {
-				JOptionPane.showMessageDialog(this, "Fichier inexistant");
-			}
-		} else {
-			JOptionPane.showMessageDialog(this, "Fonction pas supportée par votre OS");
-		}
 	}
 
 	/**

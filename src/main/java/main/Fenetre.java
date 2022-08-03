@@ -1,111 +1,121 @@
 package main;
 
-import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.File;
 import java.io.IOException;
 
+import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.Alignment;
+import javax.swing.ImageIcon;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTextField;
+import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.event.ChangeEvent;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import controleur.PanneauChoix;
+import controleur.Stockage;
+import radio_button.RadioButtonCustom;
 import spinner.Spinner;
 import vue.VueDessin;
 
-public class Fenetre extends JFrame {
+@SuppressWarnings("all")
 
-	private VueDessin vdessin;
-
-	private PanneauChoix choix;
-
-	private JTextField textField;
-
-	private JPanel panel;
+public class Fenetre extends javax.swing.JFrame {
 
 	public static Spinner cm;
 
-	public Fenetre(String title, int longeur, int largeur) throws IOException {
+	VueDessin vdessin;
 
-		setTitle(title);
+	PanneauChoix choix;
 
-		setPreferredSize(new Dimension(longeur, largeur));
+	private JMenuBar menuBar;
 
-		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+	private JMenuItem mntmNewMenuItem;
 
-		getContentPane().setLayout(new BorderLayout());
+	public static Spinner r1;
 
-		setMinimumSize(new Dimension(500, 493));
+	public static Spinner r2;
 
-		JScrollPane scrollPane = new JScrollPane(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
-				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
+	public static Spinner tip;
 
-		addWindowListener(new WindowAdapter() {
+	public static RadioButtonCustom defaultShape;
+
+	public static Spinner numberOfSides;
+
+	public Fenetre() throws IOException {
+
+		setAlwaysOnTop(true);
+
+		setTitle("Test");
+
+		menuBar = new JMenuBar();
+
+		setJMenuBar(menuBar);
+
+		mntmNewMenuItem = new JMenuItem("Save");
+		mntmNewMenuItem.setIcon(new ImageIcon(Fenetre.class.getResource("/images/save.png")));
+		menuBar.add(mntmNewMenuItem);
+
+		mntmNewMenuItem.addMouseListener(new MouseAdapter() {
 
 			@Override
 
-			public void windowClosing(WindowEvent e) {
+			public void mousePressed(MouseEvent e) {
 
-				int confirmed = JOptionPane.showConfirmDialog(vdessin, "Voulez vous sauvegarder avant de quitter ?",
-						"Voulez vous sauvegarder avant de quitter ?", JOptionPane.YES_NO_CANCEL_OPTION);
+				JFileChooser jFileChooser = new JFileChooser("Exporter en image");
 
-				if (confirmed == JOptionPane.YES_OPTION) {
+				jFileChooser
+						.setFileFilter(new FileNameExtensionFilter("Image (.png,.jpg,.jpeg)", "png", "jpg", "jpeg"));
 
-					choix.save();
+				int i = jFileChooser.showDialog(vdessin, "Exporter");
+
+				if (i == 0) {
+
+					File f = jFileChooser.getSelectedFile();
+
+					i = JOptionPane.showConfirmDialog(vdessin,
+							"Cette opération peut prendre un certain temps, voulez vous contiuer ?");
+
+					if (i == 0) {
+
+						vdessin.toImage(f);
+
+					}
 
 				}
-
-				else if (confirmed == JOptionPane.CANCEL_OPTION || confirmed == JOptionPane.CLOSED_OPTION) {
-
-					return;
-
-				}
-
-				dispose();
-
-				System.exit(0);
 
 			}
 
 		});
 
-		vdessin = new VueDessin();
+		initComponents();
 
-		choix = new PanneauChoix(vdessin);
+		this.setVisible(true);
 
-		vdessin.addMenuControler(choix);
+	}
 
-		textField = new JTextField();
+	public static void main(String[] args) {
 
-		getContentPane().add(textField, BorderLayout.SOUTH);
+		try {
 
-		textField.setColumns(10);
+			new Fenetre().setVisible(true);
 
-		scrollPane.setViewportView(vdessin);
+		}
 
-		getContentPane().add(scrollPane, BorderLayout.CENTER);
+		catch (Exception e) {
 
-		getContentPane().add(choix, BorderLayout.NORTH);
-
-		panel = new JPanel();
-
-		choix.add(panel);
-
-		cm = new Spinner();
-
-		panel.add(cm);
-
-		cm.setMinValor(1);
-
-		pack();
-
-		setJMenuBar(choix.getMenuBar());
-
-		setVisible(true);
+		}
 
 	}
 
@@ -115,9 +125,137 @@ public class Fenetre extends JFrame {
 
 	}
 
-	public static void main(String[] arguments) throws IOException {
+	public void initComponents() throws IOException {
 
-		new Fenetre("Figures Geometriques", 1024, 500);
+		vdessin = new VueDessin();
+
+		choix = new PanneauChoix(vdessin);
+
+		choix.thin.setSelected(true);
+
+		vdessin.addKeyListener(new KeyAdapter() {
+
+			@Override
+
+			public void keyPressed(KeyEvent e) {
+
+				if (e.getKeyCode() == KeyEvent.VK_Z) {
+
+					choix.dmodele.setListFigureColore(Stockage.retriveBefore(choix.dmodele.getListFigureColore()));
+
+					choix.look();
+
+				}
+
+				if (e.getKeyCode() == KeyEvent.VK_Y) {
+
+					choix.dmodele.setListFigureColore(Stockage.retrieveLast(choix.dmodele.getListFigureColore()));
+
+					choix.look();
+
+				}
+
+			}
+
+		});
+
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+		setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+
+		setResizable(false);
+
+		JScrollPane scrollPane = new JScrollPane(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
+				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
+
+		cm = new Spinner();
+
+		cm.setMinValor(1);
+
+		cm.setLabelText("Cm");
+
+		r1 = new Spinner();
+
+		r1.setLabelText("Radius 1");
+
+		r1.setMinValor(1);
+
+		r2 = new Spinner();
+
+		r2.setLabelText("Radius 2");
+
+		r2.setMinValor(1);
+
+		tip = new Spinner();
+
+		tip.setLabelText("Number of star tips");
+
+		tip.setMinValor(1);
+
+		defaultShape = new RadioButtonCustom("Default");
+
+		numberOfSides = new Spinner();
+		numberOfSides.setMaxValor(20);
+
+		numberOfSides.setMinValor(3);
+
+		numberOfSides.setLabelText("Number of sides");
+
+		javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+
+		layout.setHorizontalGroup(layout.createParallelGroup(Alignment.LEADING)
+				.addGroup(layout.createSequentialGroup().addGap(18)
+						.addComponent(cm, GroupLayout.PREFERRED_SIZE, 56, GroupLayout.PREFERRED_SIZE)
+						.addPreferredGap(ComponentPlacement.UNRELATED)
+						.addComponent(r1, GroupLayout.PREFERRED_SIZE, 74, GroupLayout.PREFERRED_SIZE)
+						.addPreferredGap(ComponentPlacement.UNRELATED)
+						.addComponent(r2, GroupLayout.PREFERRED_SIZE, 84, GroupLayout.PREFERRED_SIZE)
+						.addPreferredGap(ComponentPlacement.UNRELATED)
+						.addComponent(tip, GroupLayout.PREFERRED_SIZE, 130, GroupLayout.PREFERRED_SIZE)
+						.addPreferredGap(ComponentPlacement.RELATED)
+						.addComponent(numberOfSides, GroupLayout.PREFERRED_SIZE, 129, GroupLayout.PREFERRED_SIZE)
+						.addPreferredGap(ComponentPlacement.UNRELATED)
+						.addComponent(defaultShape, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+								GroupLayout.PREFERRED_SIZE)
+						.addGap(735))
+				.addGroup(layout.createSequentialGroup().addContainerGap()
+						.addComponent(choix, GroupLayout.DEFAULT_SIZE, 1308, Short.MAX_VALUE).addContainerGap())
+				.addGroup(layout.createSequentialGroup().addContainerGap()
+						.addComponent(scrollPane, GroupLayout.PREFERRED_SIZE, 1250, GroupLayout.PREFERRED_SIZE)
+						.addContainerGap(68, Short.MAX_VALUE)));
+
+		layout.setVerticalGroup(layout.createParallelGroup(Alignment.LEADING).addGroup(layout.createSequentialGroup()
+				.addContainerGap()
+				.addComponent(choix, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+				.addGap(18)
+				.addGroup(layout.createParallelGroup(Alignment.TRAILING, false)
+						.addComponent(defaultShape, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+						.addComponent(cm, GroupLayout.DEFAULT_SIZE, 50, Short.MAX_VALUE)
+						.addComponent(r1, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+						.addComponent(r2, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+						.addComponent(tip, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+						.addComponent(numberOfSides, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE,
+								Short.MAX_VALUE))
+				.addPreferredGap(ComponentPlacement.UNRELATED)
+				.addComponent(scrollPane, GroupLayout.PREFERRED_SIZE, 724, GroupLayout.PREFERRED_SIZE).addGap(25))
+
+		);
+
+		scrollPane.setViewportView(vdessin);
+
+		getContentPane().setLayout(layout);
+
+		setSize(new Dimension(1379, 980));
+
+		setLocationRelativeTo(null);
+
+	}
+
+	public void actionPerformed(ActionEvent arg0) {
+
+	}
+
+	public void stateChanged(ChangeEvent e) {
 
 	}
 
